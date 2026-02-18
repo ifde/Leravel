@@ -37,7 +37,8 @@ def save_message(channel, message, posted_at):
     try:
         # Use 'http://localhost' if running on host, or 'http://laravel.test' for Sail
         laravel_api_url = "http://localhost/api/broadcast-telegram-message"
-        requests.post(laravel_api_url, data={'message_id': new_id})
+        response = requests.post(laravel_api_url, data={'message_id': new_id})
+        print(response.status_code) # If this is 419, it's CSRF. If 404, it's the route path.
         print("Message sent to the website wow!")
     except Exception as e:
         print(f"Failed to notify Laravel: {e}")

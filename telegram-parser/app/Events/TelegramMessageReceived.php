@@ -7,12 +7,13 @@ use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-// implements is for interfaces
-class TelegramMessageReceived implements ShouldBroadcast
+// 'implements' is for interfaces
+// ShouldBroadcastNow hands the event to the driver (Reverb)
+class TelegramMessageReceived implements ShouldBroadcastNow
 {
     // telling PHP to take all the functions defined in those three files 
     // and virtually paste them directly into your our class
@@ -36,7 +37,12 @@ class TelegramMessageReceived implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('messages'),
+            new Channel('messages'),
         ];
+    }
+
+    public function broadcastAs(): string
+    {
+        return 'TelegramMessageReceived';
     }
 }

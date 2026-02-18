@@ -6,11 +6,15 @@ import react from '@vitejs/plugin-react'; // adding React
 
 export default defineConfig({
     plugins: [
+        // Vite says: "Okay, the main thing I am building is called 
+        // resources/js/app.jsx. 
+        // I will keep track of it using exactly that name and create a mapping"
         laravel({
-            input: ['resources/css/app.css', 'resources/js/app.js'],
+            input: ['resources/js/app.jsx'],
             refresh: true,
         }),
-        tailwindcss(),
+        react(),
+        tailwindcss()
     ],
     server: {
         watch: {

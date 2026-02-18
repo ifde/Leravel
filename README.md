@@ -20,7 +20,7 @@ it is a utility within laravel that dose lots of things
 
 App is available at `https://localhost`
 
-3. Installing Livewire/livewaire (the UI)
+3. Installing Livewire/livewaire (the UI) **NOT USED ANYMORE - SWITCHED TO REACT**
 
 `./vendor/bin/sail composer require livewire/livewire`
 
@@ -35,7 +35,7 @@ Running the migration
 
 `./vendor/bin/sail artisan migrate`
 
-5. Create the UI 
+5. Create the Livewire UI **NOT USED ANYMORE - SWITCHED TO REACT**
 
 `./vendor/bin/sail artisan make:livewire TelegramMessages --class`
 
@@ -44,12 +44,22 @@ Running the migration
 `uv run python main.py`     
 Note: might need a bot API key
 
+It uses `routes/api.php` where a post method is defined 
+`Route::post('/broadcast-telegram-message'`
+
+**Make sure to add**    
+`api: __DIR__.'/../routes/api.php'` in `bootstrap/app.php`      
+I spent so much time fixing it
+
 7. Now let's install the websocket so that when the script pushes messages to the database the webpage is updated 
 
 `./vendor/bin/sail artisan install:broadcasting`
 
 Start a WebSocket in the new terminal:      
-`./vendor/bin/sail artisan reverb:start`
+`./vendor/bin/sail artisan reverb:start -- debug`
+
+**Add the port to the docker compose!** 
+`- '${REVERB_PORT:-8080}:8080' # <--- Add this line`
 
 Create an event     
 `./vendor/bin/sail artisan make:event TelegramMessageReceived`
@@ -65,23 +75,20 @@ We trigger the event in our PHP code
 
 It is broadcasted on this channel: 
 
-`PrivateChannel('messages')`
+`Channel('messages')`
 
 It sends data to a Reverb WebSocket
 
-- Then on the frontend
+- Then on the frontend we use it 
 
-```javascript
-Echo.private('message') // Laravel adds 'private-' prefix automatically
-    .listen('TelegramMessageReceived', (e) => {
-        console.log('New message arrived!', e.message);
-        // Here is where you append the message to your HTML list
-    });
+```jsx
+// Listen for real-time updates
+        window.Echo.channel('messages')
+            .listen('.TelegramMessageReceived', (event) => {
+                console.log("Event received!", event); // <-- Add this
+                setMessages(prev => [event.message, ...prev]);
+            });
 ```
-
-`Echo` is the library by Laravel     
-`Echo.private('message')` return a class that throws the events     
-We get them with `.listen`     
 
 8. Then run `./vendor/bin/sail npm run dev`
 
@@ -93,13 +100,42 @@ It starts Vite, which is a factory for frontend assets
 
 `./vendor/bin/sail artisan inertia:middleware`
 
-Then we register the middleware in `bootstarp/app.php`
+Then we register the middleware in `bootstrap/app.php`
 
 Then install React `./vendor/bin/sail npm install @inertiajs/react react react-dom @vitejs/plugin-react`
 
-Vite: The factory that turns raw wood (JSX/CSS) into a finished chair (JavaScript) that the browser can actually understand.
+**Laravel**     
+When you visit a page, Laravel's Inertia::render('Dashboard') sends a JSON response to the browser that says: "The user needs the 'Dashboard' component"         
 
-Inertia: The delivery truck that carries that chair from the Laravel warehouse to your house without you having to reload the page.
+
+**Inertia**
+Inertia handles this 'Dashboard' by fetching a React Component from Vite     
+
+**Vite**    
+When you run `./vendor/bin/sail npm run dev`, Vite is working in the background.    
+It takes your .jsx files and turns them into a single, optimized .js file.      
+The "Finished Chairs" (JavaScript) are now sitting on a shelf in the Vite server, ready to be picked up.
+
+
+### How Vite + Inertia + React work together
+
+1. When you visit http://localhost  
+The Route: Your browser sends a request to Laravel.     
+The Controller: A controller method runs and returns Inertia::render('Home', ['data' => $val]). 
+The Middleware: The HandleInertiaRequests middleware runs. 
+It looks at the $rootView property to find your app.blade.php file
+
+2. Laravel renders app.blade.php into standard HTML to send back to your browser    
+@inertia: This renders a `<div id="app" data-page="...">`. All the data from your controller and middleware is converted into a JSON string and placed inside that data-page attribute.
+@vite: This renders a <script> tag pointing to your resources/js/app.jsx
+
+3. Your browser receives the HTML and sees the <script> tag for app.jsx:
+The Fetch: The browser requests app.jsx. Since you are in development (npm run dev), the Vite server provides this file.
+The Execution: The browser runs the code in app.jsx immediately.
+
+
+
+
 
 
 

@@ -11,5 +11,7 @@ Route::post('/broadcast-telegram-message', function (Request $request) {
     // 2. Dispatch the event (this triggers the WebSocket broadcast)
     TelegramMessageReceived::dispatch($message);
 
+    // event(new TelegramMessageReceived($message));
+
     return response()->json(['status' => 'success']);
-});
+})->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
