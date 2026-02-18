@@ -83,3 +83,36 @@ Route::post('/telegram-messages', function (Request $request) {
         ], 400);
     }
 });
+
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+
+
+// Save a message (authenticated users only)
+// Make sure to add ['auth', 'web'] because we want api routes to share
+// the same session context as 'web'
+Route::middleware(['auth', 'web'])->post('/messages/{id}/save', function (Request $request, $id) {
+    // it looks into config/auth.php to find a user
+    $user = Auth::user();
+    $message = TelegramMessage::findOrFail($id);
+
+    if (!$user->savedMessages()->where('telegram_message_id', $id)->exists()) {
+        $user->savedMessages()->attach($id);
+        return response()->json(['status' => 'saved']);
+    }
+
+    return response()->json(['status' => 'already saved'], 200);
+});
+
+// Unsave a message
+Route::middleware(['auth', 'web'])->delete('/messages/{id}/save', function (Request $request, $id) {
+    $user = Auth::user();
+    $user->savedMessages()->detach($id);
+    return response()->json(['status' => 'unsaved']);
+});
+
+// Get saved messages for the user
+Route::middleware(['auth', 'web'])->get('/saved-messages', function () {
+    $user = Auth::user();
+    return $user->savedMessages()->with('savedByUsers')->orderBy('posted_at', 'desc')->get();
+});

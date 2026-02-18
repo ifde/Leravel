@@ -45,4 +45,12 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * Get all saved messages of a user
+     */
+    public function savedMessages()
+    {
+        return $this->belongsToMany(TelegramMessage::class, 'saved_messages');
+    }
 }

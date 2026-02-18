@@ -50,6 +50,12 @@ return [
     |
     */
 
+    /**
+     * driver is a function that processes logs and write them somewhere
+     * Single write to one file 
+     * Stack to multiple files
+     */
+
     'channels' => [
 
         'stack' => [
