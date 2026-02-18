@@ -134,6 +134,27 @@ The Fetch: The browser requests app.jsx. Since you are in development (npm run d
 The Execution: The browser runs the code in app.jsx immediately.
 
 
+### Sail tinker 
+
+Use it to run PHP code in an interactive shell 
+
+`./vendor/bin/sail tinker`
+
+```php
+<?php
+>>> $response = Http::post('http://laravel/api/telegram-messages', ['channel' => 'test', 'message' => 'test', 'posted_at' => now()]);
+>>> $response->status();
+```
+
+### Sail shell
+
+`sail shell`
+
+### See the logs
+
+`tail -f storage/logs/laravel.log`
+
+
 
 
 
