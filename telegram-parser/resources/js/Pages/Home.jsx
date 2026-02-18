@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import Echo from 'laravel-echo';
 
 export default function TelegramMessages() {
     // saving a state for the messages array
