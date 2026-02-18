@@ -9,7 +9,7 @@ services:
         extra_hosts:
             - 'host.docker.internal:host-gateway'
         ports:
-            - '${APP_PORT:-80}:80'
+            - '${APP_PORT:-80}:80' # 80 is default
             - '${VITE_PORT:-5173}:${VITE_PORT:-5173}'
             - '${REVERB_PORT:-8080}:8080' # <--- Add this line
         environment:

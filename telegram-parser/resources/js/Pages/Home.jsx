@@ -16,7 +16,7 @@ export default function TelegramMessages() {
         // Fetch existing messages on component load
         const fetchMessages = async () => {
             try {
-                const response = await fetch('/api/telegram-messages');
+                const response = await fetch('/api/get-telegram-messages');
                 const data = await response.json();
                 setMessages(data);
             } catch (error) {
