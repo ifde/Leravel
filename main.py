@@ -13,16 +13,23 @@ client = TelegramClient('anon', api_id, api_hash)
 
 # Laravel API base URL
 LARAVEL_API_URL = "http://localhost"  # or "http://laravel.test" for Sail
+API_KEY = os.environ.get('TELEGRAM_PARSER_API_KEY', '')
 
 def save_message(channel, message, posted_at):
     try:
+        headers = {
+            'X-API-Key': API_KEY,
+            'Content-Type': 'application/json'
+        }
+
         response = requests.post(
-            f"{LARAVEL_API_URL}/api/telegram-messages",
+            f"{LARAVEL_API_URL}/api/post-telegram-message",
             json={
                 'channel': channel,
                 'message': message,
                 'posted_at': posted_at.isoformat()
-            }
+            },
+            headers=headers
         )
         
         if response.status_code == 201:

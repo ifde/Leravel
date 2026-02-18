@@ -25,3 +25,8 @@ uv run python main.py
 
 `./vendor/bin/sail artisan config:clear`
 `./vendor/bin/sail artisan cache:clear `
+
+6. Output the logs
+
+`tail -f storage/logs/laravel.log`
+

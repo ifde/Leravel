@@ -155,6 +155,24 @@ Use it to run PHP code in an interactive shell
 `tail -f storage/logs/laravel.log`
 
 
+### Using Breeze Authorization 
+
+Note: better to run on the start
+
+./vendor/bin/sail composer require laravel/breeze --dev
+./vendor/bin/sail artisan breeze:install react
+./vendor/bin/sail npm install
+./vendor/bin/sail npm run dev
+./vendor/bin/sail artisan migrate
+
+
+### Go into SQL
+
+`./vendor/bin/sail psql -U sail -d laravel`
+
+`SELECT * FROM users;`
+
+
 
 
 
