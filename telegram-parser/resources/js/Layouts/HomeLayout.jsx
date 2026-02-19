@@ -2,9 +2,9 @@ import { Link } from '@inertiajs/react';
 import { usePage } from '@inertiajs/react';
 import ApplicationLogo from '@/Components/ApplicationLogo';
 import Dropdown from '@/Components/Dropdown';
-import TabNavLinks from '@/Components/TabNavLinks'; // Add import
+// Remove TabNavLinks import
 
-export default function HomeLayout({ children, tabProps }) {
+export default function HomeLayout({ children }) { // Remove tabProps
     const { auth } = usePage().props;
 
     return (
@@ -19,9 +19,6 @@ export default function HomeLayout({ children, tabProps }) {
                                     <ApplicationLogo className="block h-9 w-auto fill-current text-gray-800 dark:text-gray-200" />
                                 </Link>
                             </div>
-
-                            {/* Use TabNavLinks Component */}
-                            {tabProps && <TabNavLinks tabProps={tabProps} />}
                         </div>
 
                         <div className="hidden sm:flex sm:items-center sm:ml-6">

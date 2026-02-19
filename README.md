@@ -35,6 +35,8 @@ Running the migration
 
 `./vendor/bin/sail artisan migrate`
 
+Note: `php artisan migrate:fresh` to drop the tables and start them
+
 5. Create the Livewire UI **NOT USED ANYMORE - SWITCHED TO REACT**
 
 `./vendor/bin/sail artisan make:livewire TelegramMessages --class`
@@ -103,6 +105,12 @@ It starts Vite, which is a factory for frontend assets
 Then we register the middleware in `bootstrap/app.php`
 
 Then install React `./vendor/bin/sail npm install @inertiajs/react react react-dom @vitejs/plugin-react`
+
+10. Link the public storage to diplay images on the page
+
+`./vendor/bin/sail artisan storage:link`
+
+The [public/storage] link has been connected to [storage/app/public]
 
 **Laravel**     
 When you visit a page, Laravel's Inertia::render('Dashboard') sends a JSON response to the browser that says: "The user needs the 'Dashboard' component"         
