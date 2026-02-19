@@ -14,8 +14,9 @@ return new class extends Migration
         Schema::create('telegram_messages', function (Blueprint $table) {
             $table->id();
             $table->string('channel');
-            $table->text('message');
+            $table->text('message')->nullable();
             $table->timestamp('posted_at')->nullable();
+            $table->string('profile_pic_path')->nullable();  // Add this
             $table->timestamps();
         });
     }

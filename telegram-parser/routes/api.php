@@ -19,6 +19,7 @@ Route::middleware(\App\Http\Middleware\ApiKeyMiddleware::class)->post('/post-tel
         'channel' => 'required|string|max:255',
         'message' => 'required|string',
         'posted_at' => 'required|date',
+        'profile_pic_path' => 'nullable|string',
     ]);
 
     try {
@@ -27,6 +28,7 @@ Route::middleware(\App\Http\Middleware\ApiKeyMiddleware::class)->post('/post-tel
             'channel' => $validated['channel'],
             'message' => $validated['message'],
             'posted_at' => $validated['posted_at'],
+            'profile_pic_path' => $validated['profile_pic_path'],
         ]);
 
         // Broadcast the event to WebSocket listeners
