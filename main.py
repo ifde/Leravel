@@ -49,7 +49,7 @@ def save_message(channel, message, posted_at, profile_pic_path):
 @client.on(events.NewMessage(chats=CHANNELS))  # Only listen to specified channels
 async def handler(event):
     chat = await event.get_chat()
-    # get channel handle;
+    # get channel handle
     channel = chat.username or 'unknown'
     
     # Extra check (optional)

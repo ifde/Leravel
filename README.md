@@ -47,7 +47,7 @@ Note: `php artisan migrate:fresh` to drop the tables and start them
 Note: might need a bot API key
 
 It uses `routes/api.php` where a post method is defined 
-`Route::post('/broadcast-telegram-message'`
+`Route::post('/broadcast-telegram-message')`
 
 **Make sure to add**    
 `api: __DIR__.'/../routes/api.php'` in `bootstrap/app.php`      
@@ -179,6 +179,24 @@ Note: better to run on the start
 `./vendor/bin/sail psql -U sail -d laravel`
 
 `SELECT * FROM users;`
+
+
+### Create Vacancies database
+
+`./vendor/bin/sail artisan make:model Vacancy -m`   
+`-m` also creates a migration
+
+Run the migration       
+
+(first, you can also rollbakc the previous one if you made any changes)     
+`./vendor/bin/sail artisan migrate:rollback --step=1`
+
+Then do this    
+`./vendor/bin/sail artisan migrate`
+
+
+Create a controller
+`./vendor/bin/sail artisan make:controller VacancyController`
 
 
 

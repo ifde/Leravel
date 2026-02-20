@@ -30,3 +30,8 @@ uv run python main.py
 
 `tail -f storage/logs/laravel.log`
 
+
+
+
+https://hh.ru/search/vacancy?text=PHP&excluded_text=&professional_role=96&salary=&salary=&currency_code=RUR&experience=doesNotMatter&work_format=REMOTE&order_by=publication_time&search_period=0&items_on_page=200&L_save_area=true&page=2&search_session_id=62842306-89f2-4ac4-91f7-6135fc6f48e7
+
