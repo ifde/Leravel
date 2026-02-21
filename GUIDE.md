@@ -32,8 +32,25 @@ uv run python main.py
 
 `tail -f storage/logs/laravel.log`
 
+# How to deploy a Laravel project 
+
+0. Load on GitHub
 
 
 
-https://hh.ru/search/vacancy?text=PHP&excluded_text=&professional_role=96&salary=&salary=&currency_code=RUR&experience=doesNotMatter&work_format=REMOTE&order_by=publication_time&search_period=0&items_on_page=200&L_save_area=true&page=2&search_session_id=62842306-89f2-4ac4-91f7-6135fc6f48e7
+1. Create a VPS 
+
+Or download the private-public key pair from Yandex and unzip it into a special folder:   
+`unzip /Users/admin/Downloads/ssh-key-1771671861436.zip -d /Users/admin/.ssh/`
+
+Set the private key to be able to read only by you:     
+`chmod 600 /Users/admin/.ssh/ssh-key-1771671861436`
+
+Connect using   
+`ssh -i ~/.ssh/ssh-key-1771671861436 laravel@158.160.0.235`
+
+
+
+
+
 
