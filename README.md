@@ -2,6 +2,16 @@
 
 ### Guide
 
+0. Configure git name
+
+```
+git config user.name "Ivan"
+git config user.email "ifdeifde@gmail.com"
+
+git config --get user.name
+git config --get user.email
+```
+
 1. `curl -s "https://laravel.build/name?with=pgsql,redis&devcontainer" | bash`
 
 This executes a script to create a basis PHP laravel project 
