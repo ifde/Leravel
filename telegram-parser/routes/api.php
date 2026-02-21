@@ -88,3 +88,12 @@ Route::middleware(['auth', 'web'])->get('/saved-messages', function () {
 use App\Http\Controllers\VacancyController;
 
 Route::middleware(\App\Http\Middleware\ApiKeyMiddleware::class)->post('/vacancies', [VacancyController::class, 'store']);
+
+Route::get('/vacancies', [VacancyController::class, 'index']);
+
+Route::middleware(['auth', 'web'])->group(function () {
+    Route::post('/vacancies/save', [VacancyController::class, 'save']);
+    Route::delete('/vacancies/unsave', [VacancyController::class, 'unsave']);
+    Route::get('/vacancies/is-saved', [VacancyController::class, 'isSaved']);
+    Route::get('/user/saved-vacancies', [VacancyController::class, 'getSaved']);  // Add this route
+});

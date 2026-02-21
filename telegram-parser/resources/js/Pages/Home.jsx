@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+// import Echo from '@/echo';
+import { router } from '@inertiajs/react';
 import HomeLayout from '@/Layouts/HomeLayout';
-import MessageBox from '@/Components/MessageBox';
+import VacancyModal from '@/Components/VacancyModal';
 
-// Configure Axios globally for credentials and CSRF
+// Axios config (same as before)
 axios.defaults.withCredentials = true;
 axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 axios.defaults.headers.common['Accept'] = 'application/json';
 
-// Function to get CSRF token from cookies
 const getCsrfToken = () => {
     const name = 'XSRF-TOKEN';
     const value = `; ${document.cookie}`;
@@ -17,7 +18,6 @@ const getCsrfToken = () => {
     return null;
 };
 
-// Add CSRF token to requests automatically
 axios.interceptors.request.use((config) => {
     const token = getCsrfToken();
     if (token && ['post', 'put', 'delete', 'patch'].includes(config.method?.toLowerCase())) {
@@ -26,50 +26,139 @@ axios.interceptors.request.use((config) => {
     return config;
 });
 
-export default function TelegramMessages() {
-    const [messages, setMessages] = useState([]);
+export default function Home({ auth }) {
+    const [vacancies, setVacancies] = useState([]);
+    const [selectedVacancy, setSelectedVacancy] = useState(null);
+    const [savedVacancies, setSavedVacancies] = useState(new Set());
+    const [filter, setFilter] = useState('all');
 
-    // Fetch all messages
     useEffect(() => {
-        const fetchMessages = async () => {
-            try {
-                const response = await axios.get('/api/get-telegram-messages');
-                setMessages(response.data);
-            } catch (error) {
-                console.error('Failed to fetch messages:', error);
-            }
-        };
-        fetchMessages();
-    }, []);
+        axios.get('/api/vacancies')
+            .then(response => setVacancies(response.data))
+            .catch(error => console.error('Error fetching vacancies:', error));
 
-    // Echo listener
-    useEffect(() => {
-        window.Echo.channel('messages')
-            .listen('.TelegramMessageReceived', (event) => {
-                setMessages(prev => [event.message, ...prev]);
+        if (auth.user) {
+            axios.get('/api/user/saved-vacancies')
+                .then(response => setSavedVacancies(new Set(response.data.map(v => v.url))))
+                .catch(() => { });
+        }
+
+        // Listen for the event
+        window.Echo.channel('vacancies')
+            // make sure to use the dot ".VacancyReceived"
+            .listen('.VacancyReceived', (e) => {
+                setVacancies(prev => [e.vacancy, ...prev]);  // Add new vacancy to the top
+                console.log("Event received");
+                return vacancies.sort((a, b) => new Date(b.posted_at) - new Date(a.posted_at));
             });
-        return () => window.Echo.leave('messages');
-    }, []);
+
+        return () => {
+            window.Echo.leave('vacancies');  // Cleanup
+        };
+    }, [auth.user]);
+
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    };
+
+    const handleSave = async (url) => {
+        if (!auth.user) {
+            router.visit('/login');
+            return;
+        }
+        try {
+            await axios.post('/api/vacancies/save', { url });
+            setSavedVacancies(prev => new Set([...prev, url]));
+        } catch (error) {
+            console.error('Save failed:', error);
+        }
+    };
+
+    const handleUnsave = async (url) => {
+        if (!auth.user) {
+            router.visit('/login');
+            return;
+        }
+        try {
+            await axios.delete('/api/vacancies/unsave', { data: { url } });
+            setSavedVacancies(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(url);
+                return newSet;
+            });
+        } catch (error) {
+            console.error('Unsave failed:', error);
+        }
+    };
+
+    const displayedVacancies = filter === 'saved' ? vacancies.filter(v => savedVacancies.has(v.url)) : vacancies;
 
     return (
         <HomeLayout>
-            <div className="h-full overflow-y-auto bg-gray-100 dark:bg-gray-900 py-8 space-y-8"> {/* Add space-y-8 for spacing */}
-                {messages.length === 0 ? (
-                    <div className="flex items-center justify-center h-full">
-                        <p className="text-gray-500 dark:text-gray-400 text-lg">No messages yet</p>
+            <div className="container mx-auto p-4 pb-24 h-screen overflow-y-auto">
+                <h1 className="text-2xl font-bold mb-4">Vacancies</h1>
+                <div className="mb-4 flex space-x-4">
+                    <div className="mb-4 flex space-x-4">
+                        <button
+                            onClick={() => setFilter('all')}
+                            className={`px-4 py-2 rounded ${filter === 'all' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                        >
+                            All
+                        </button>
+                        <button
+                            onClick={() => setFilter('saved')}
+                            className={`px-4 py-2 rounded ${filter === 'saved' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                        >
+                            Saved ({savedVacancies.size})
+                        </button>
                     </div>
-                ) : (
-                    messages.map((msg) => (
-                        <div key={msg.id} className="flex justify-center px-4"> {/* Center each message */}
-                            <MessageBox
-                                msg={msg}
-                                auth={null}
-                                isSaved={() => false}
-                                onSave={() => { }}
-                                onUnsave={() => { }}
-                            />
-                        </div>
-                    ))
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {displayedVacancies.map(vacancy => {
+                        const isNew = (new Date() - new Date(vacancy.posted_at)) < (24 * 60 * 60 * 1000);  // Less than 24 hours
+                        return (
+                            <div
+                                key={vacancy.url}  // Use url as key
+                                className={`border rounded-lg p-4 shadow hover:shadow-lg cursor-pointer ${savedVacancies.has(vacancy.url) ? 'border-green-500' : ''}`}
+                                onClick={() => setSelectedVacancy(vacancy)}
+                            >
+                                <div className="flex items-center mb-2">
+                                    <img src={`/storage/source_logos/${vacancy.source}.png`} alt={vacancy.source} className="w-6 h-6 mr-2" />
+                                    <span className="text-sm font-semibold">{vacancy.source.toUpperCase()}</span>
+                                    {isNew && (
+                                        <span className="ml-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full font-bold">
+                                            NEW
+                                        </span>
+                                    )}
+                                </div>
+                                <h2 className="text-lg font-bold">{vacancy.title}</h2>
+                                <div className="flex items-center mt-2">
+                                    {vacancy.logo && <img src={`/storage/${vacancy.logo}`} alt={vacancy.company} className="w-8 h-8 mr-2" />}
+                                    <p className="text-gray-600">{vacancy.company}</p>
+                                </div>
+                                <div className="flex flex-wrap gap-1 mt-2">
+                                    {vacancy.skills.map((skill, index) => (
+                                        <span key={index} className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
+                                            {skill}
+                                        </span>
+                                    ))}
+                                </div>
+                                <p className="text-sm text-gray-500 mt-2">{vacancy.country}</p>
+                                <p className="text-sm text-gray-500">{formatDate(vacancy.posted_at)}</p>
+                            </div>
+                        );
+                    })}
+                </div>
+                {selectedVacancy && (
+                    <VacancyModal
+                        vacancy={selectedVacancy}
+                        onClose={() => setSelectedVacancy(null)}
+                        auth={auth}
+                        isSaved={savedVacancies.has(selectedVacancy.url)}
+                        onSave={() => handleSave(selectedVacancy.url)}
+                        onUnsave={() => handleUnsave(selectedVacancy.url)}
+                    />
                 )}
             </div>
         </HomeLayout>

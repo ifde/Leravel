@@ -4,16 +4,25 @@ import json
 import random
 import re  # Add for regex matching
 import os
+from dotenv import load_dotenv
 import requests
 import shared
 from datetime import datetime
 from playwright.async_api import async_playwright
 
+load_dotenv()
+
 # Base search URL without page
 BASE_SEARCH_URL = "https://hh.ru/search/vacancy?text=PHP&professional_role=96&work_format=REMOTE&per_page=200&order_by=publication_time"
 
-MAX_PAGE_COUNT=1
-MAX_CARDS_PER_PAGE=8
+MAX_PAGE_COUNT = int(os.environ.get('MAX_PAGE_COUNT', 100))
+MAX_CARDS_PER_PAGE = int(os.environ.get('MAX_CARDS_PER_PAGE', 100))
+SAVE_ONLY_NEW = int(os.environ.get('SAVE_ONLY_NEW', 0))
+
+print(f"Starting the hh_scraper script")
+print(f"MAX_PAGE_COUNT: {MAX_PAGE_COUNT}")
+print(f"MAX_CARDS_PER_PAGE: {MAX_CARDS_PER_PAGE}")
+print(f"SAVE_ONLY_NEW: {SAVE_ONLY_NEW}")
 
 # Ensure logos folder exists
 os.makedirs('telegram-parser/storage/app/public/logos', exist_ok=True)
@@ -145,7 +154,7 @@ async def scrape_vacancy_details(context, url):
 
 async def main():
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=False)
+        browser = await p.chromium.launch(headless=True)
         context = await browser.new_context(
             user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
         )
@@ -163,7 +172,7 @@ async def main():
             print(f"Total pages: {max_page}")
             
             vacancies = []
-            for page_num in range(min(max_page, MAX_PAGE_COUNT)): # 1 page for testing
+            for page_num in range(min(max_page, MAX_PAGE_COUNT)):
                 if page_num > 0:
                     search_url = f"{BASE_SEARCH_URL}&page={page_num}"
                     await page.goto(search_url, timeout=60000)
@@ -185,14 +194,15 @@ async def main():
                         if shared.send_vacancy_to_db(vacancy_data):
                             vacancies.append(vacancy_data)
                         else:
-                            flag = False
-                            break
+                            if SAVE_ONLY_NEW:
+                                flag = False
+                                break
                     
                     if not flag:
                         break
                     
                     # Random delay between jobs
-                    await asyncio.sleep(random.uniform(1, 3))
+                    # await asyncio.sleep(random.uniform(1, 3))
                 
                 if not flag:
                     print("No new vacancies on this page, stopping")

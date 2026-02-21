@@ -188,8 +188,9 @@ Note: better to run on the start
 
 Run the migration       
 
-(first, you can also rollbakc the previous one if you made any changes)     
-`./vendor/bin/sail artisan migrate:rollback --step=1`
+(first, you can also rollback the previous one if you made any changes)     
+`./vendor/bin/sail artisan migrate:rollback --step=1` (last one)           
+`./vendor/bin/sail artisan migrate:rollback --path=database/migrations/2026_02_20_062436_create_vacancies_table.php` (specific path)        
 
 Then do this    
 `./vendor/bin/sail artisan migrate`
@@ -197,6 +198,17 @@ Then do this
 
 Create a controller
 `./vendor/bin/sail artisan make:controller VacancyController`
+
+Create an event 
+
+`art make:event VacancyReceived`
+
+
+# Playwright
+
+### Where is Playwright browsers
+
+cd /Users/admin/Library/Caches/ms-playwright
 
 
 

@@ -32,6 +32,8 @@ data-page='{"component":"Home","props":{"user":"John"}}'></div>.
 Inertia (JS) boots up and finds the element (el) and
  the data (props) from that attribute.
 
+ App is just the Root React Component
+
 Inertia (JS) uses your resolve function to
  find the actual React file for "Home".
 

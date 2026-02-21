@@ -53,4 +53,19 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(TelegramMessage::class, 'saved_messages');
     }
+
+    /**
+     * Get all saved vacancies of a user
+     */
+    public function savedVacancies()
+    {
+        return $this->belongsToMany(
+            Vacancy::class,           // 1. Related model class
+            'saved_vacancies',             // 2. Pivot table name
+            'user_id',        // 3. Foreign key on pivot for THIS model
+            'url',        // 4. Foreign key on pivot for RELATED model
+            'id',   // 5. Local key on THIS model (optional, defaults to 'id')
+            'url'  // 6. Related key on RELATED model (optional, defaults to 'id')
+        );
+    }
 }

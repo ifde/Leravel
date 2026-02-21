@@ -4,14 +4,24 @@ import json
 import random
 import shared
 import re
+import os
+from dotenv import load_dotenv
 from datetime import datetime, timedelta
 from playwright.async_api import async_playwright
+
+load_dotenv()
 
 # Base search URL without page
 BASE_SEARCH_URL = "https://hirify.me/?params=title,company&period=month&search=PHP&skills=php&work_format=remote"
 
-MAX_PAGE_COUNT=1
-MAX_CARDS_PER_PAGE=8
+MAX_PAGE_COUNT = int(os.environ.get('MAX_PAGE_COUNT', 100))
+MAX_CARDS_PER_PAGE = int(os.environ.get('MAX_CARDS_PER_PAGE', 100))
+SAVE_ONLY_NEW = int(os.environ.get('SAVE_ONLY_NEW', 0))
+
+print(f"Starting the hirify_scraper script")
+print(f"MAX_PAGE_COUNT: {MAX_PAGE_COUNT}")
+print(f"MAX_CARDS_PER_PAGE: {MAX_CARDS_PER_PAGE}")
+print(f"SAVE_ONLY_NEW: {SAVE_ONLY_NEW}")
 
 UNIT_MAP = {
     'минут': 'minute',
@@ -137,8 +147,9 @@ async def main():
                         if shared.send_vacancy_to_db(vacancy_data):
                             vacancies.append(vacancy_data)
                         else:
-                            flag = False
-                            break
+                            if SAVE_ONLY_NEW:
+                                flag = False
+                                break
                     
                     if not flag:
                         break

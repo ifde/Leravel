@@ -1,6 +1,8 @@
 # remocate_scraper.py
 import asyncio
 import json
+import os
+from dotenv import load_dotenv
 import random
 import re
 import requests
@@ -8,14 +10,23 @@ from datetime import datetime, timedelta
 from playwright.async_api import async_playwright
 import shared
 
+load_dotenv()
+
 # This is somewhat special
 # It has infinite scroll
 # Plus you got to pause the Playwright script to manyally type filters
 # Otherwise there's some weird anibot scrolling
 
 BASE_URL = "https://www.remocate.app"
-MAX_SCROLL_ROUNDS = 1
-MAX_CARDS_PER_PAGE=8
+
+MAX_SCROLL_ROUNDS = int(os.environ.get('MAX_PAGE_COUNT', 100))
+MAX_CARDS_PER_PAGE = int(os.environ.get('MAX_CARDS_PER_PAGE', 100))
+SAVE_ONLY_NEW = int(os.environ.get('SAVE_ONLY_NEW', 0))
+
+print(f"Starting the hirify_scraper script")
+print(f"MAX_SCROLL_ROUNDS: {MAX_SCROLL_ROUNDS}")
+print(f"MAX_CARDS_PER_PAGE: {MAX_CARDS_PER_PAGE}")
+print(f"SAVE_ONLY_NEW: {SAVE_ONLY_NEW}")
 
 async def simulate_human_behavior(page):
     await page.mouse.move(random.randint(100, 800), random.randint(100, 600))
@@ -138,8 +149,9 @@ async def main():
                         if shared.send_vacancy_to_db(vacancy_data):
                             saved_vacancies.append(vacancy_data)
                         else:
-                            flag = False
-                            break
+                            if SAVE_ONLY_NEW:
+                                flag = False
+                                break
 
                 if not flag:
                     break

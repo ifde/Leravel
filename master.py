@@ -5,7 +5,8 @@ from datetime import datetime
 scrapers = [
     ('hh_scraper.py', 'hh_vacancies_scraped.json'),
     ('hirify_scraper.py', 'hirify_vacancies_scraped.json'),
-    ('remocate_scraper.py', 'remocate_vacancies_scraped.json')
+    ('remocate_scraper.py', 'remocate_vacancies_scraped.json'),
+    ('telegram_scraper.py', 'telegram_vacancies_scraped.json')
 ]
 
 # Load existing log

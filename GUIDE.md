@@ -14,6 +14,8 @@ You need the WebSocket because the Backend cannot "push" data to a browser over 
 
 `./vendor/bin/sail npm run dev --debug`
 
+Vite renders `jsx` to a normal `Java Script` that browser understands
+
 4. Open a new terminal and start a Telegram parser 
 
 ```bash
