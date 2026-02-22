@@ -123,7 +123,10 @@ sudo apt install nginx -y
 sudo apt -o Acquire::ForceIPv4=true install php8.4-fpm -y
 ```
 
+`sudo nano /etc/nginx/sites-available/telegram-parser`
+
 Insert this   
+
 ```
 server {
     listen 80;
@@ -180,6 +183,13 @@ php artisan route:cache
 php artisan view:cache
 ```
 
+Make sure Nginx and PHP-FPM (that connects Nginx and the PHP)
+
+```
+sudo systemctl status nginx
+sudo systemctl status php8.4-fpm
+```
+
 7. Port local database data to the VPS
 
 Create a json
@@ -215,6 +225,8 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 source $HOME/.local/bin/env
 ```
 Location silent ShowError
+
+
 
 
 
