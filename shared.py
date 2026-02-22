@@ -4,7 +4,7 @@ import os
 
 load_dotenv()
 
-LARAVEL_API_URL = "http://localhost"
+LARAVEL_API_URL = os.environ.get('LARAVEL_API_URL', 'http://localhost')
 API_KEY = os.environ.get('TELEGRAM_PARSER_API_KEY', '')
 
 def send_vacancy_to_db(vacancy):

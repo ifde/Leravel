@@ -205,6 +205,17 @@ psql -h 127.0.0.1 -U sail -d laravel
 
 And yes, here we are deleting the database because the dump already contains all the migrations
 
+8. Run a Telegram script on a VPS
+
+`scp -i ~/.ssh/ssh-key-1771671861436 .env.production laravel@158.160.12.112:~/Leravel/.env`
+
+Install uv  
+```
+curl -LsSf https://astral.sh/uv/install.sh | sh
+source $HOME/.local/bin/env
+```
+Location silent ShowError
+
 
 
 
