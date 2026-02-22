@@ -34,22 +34,25 @@ export default function Home({ auth }) {
 
     useEffect(() => {
         axios.get('/api/vacancies')
-            .then(response => setVacancies(response.data))
+            .then(response => setVacancies(response.data || []))
             .catch(error => console.error('Error fetching vacancies:', error));
 
         if (auth.user) {
             axios.get('/api/user/saved-vacancies')
-                .then(response => setSavedVacancies(new Set(response.data.map(v => v.url))))
+                .then(response => setSavedVacancies(new Set((response.data || []).map(v => v.url))))
                 .catch(() => { });
         }
 
         // Listen for the event
         window.Echo.channel('vacancies')
-            // make sure to use the dot ".VacancyReceived"
             .listen('.VacancyReceived', (e) => {
-                setVacancies(prev => [e.vacancy, ...prev]);  // Add new vacancy to the top
+                console.log('Vacancy data:', e); // Is it nested?
+
+                setVacancies(prev => {
+                    const next = [e, ...prev].filter(Boolean);
+                    return next.sort((a, b) => new Date(b?.posted_at || 0) - new Date(a?.posted_at || 0));
+                });
                 console.log("Event received");
-                return vacancies.sort((a, b) => new Date(b.posted_at) - new Date(a.posted_at));
             });
 
         return () => {
@@ -58,7 +61,9 @@ export default function Home({ auth }) {
     }, [auth.user]);
 
     const formatDate = (dateString) => {
+        if (!dateString) return '—';
         const date = new Date(dateString);
+        if (isNaN(date)) return '—';
         return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
     };
 
@@ -92,7 +97,9 @@ export default function Home({ auth }) {
         }
     };
 
-    const displayedVacancies = filter === 'saved' ? vacancies.filter(v => savedVacancies.has(v.url)) : vacancies;
+    const displayedVacancies = filter === 'saved'
+        ? vacancies.filter(v => v && savedVacancies.has(v.url))
+        : vacancies.filter(Boolean);
 
     return (
         <HomeLayout>
@@ -116,7 +123,8 @@ export default function Home({ auth }) {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {displayedVacancies.map(vacancy => {
-                        const isNew = (new Date() - new Date(vacancy.posted_at)) < (24 * 60 * 60 * 1000);  // Less than 24 hours
+                        const postedAt = vacancy?.posted_at ? new Date(vacancy.posted_at) : null;
+                        const isNew = postedAt ? (Date.now() - postedAt.getTime()) < (24 * 60 * 60 * 1000) : false;
                         return (
                             <div
                                 key={vacancy.url}  // Use url as key
@@ -124,7 +132,7 @@ export default function Home({ auth }) {
                                 onClick={() => setSelectedVacancy(vacancy)}
                             >
                                 <div className="flex items-center mb-2">
-                                    <img src={`/storage/source_logos/${vacancy.source}.png`} alt={vacancy.source} className="w-6 h-6 mr-2" />
+                                    <img src={`/storage/source_logos/${vacancy.source.toLowerCase()}.png`} alt={vacancy.source} className="w-6 h-6 mr-2" />
                                     <span className="text-sm font-semibold">{vacancy.source.toUpperCase()}</span>
                                     {isNew && (
                                         <span className="ml-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full font-bold">
@@ -134,11 +142,11 @@ export default function Home({ auth }) {
                                 </div>
                                 <h2 className="text-lg font-bold">{vacancy.title}</h2>
                                 <div className="flex items-center mt-2">
-                                    {vacancy.logo && <img src={`/storage/${vacancy.logo}`} alt={vacancy.company} className="w-8 h-8 mr-2" />}
+                                    {vacancy.logo && <img src={`/storage/${vacancy.logo.toLowerCase()}`} alt={vacancy.company} className="w-8 h-8 mr-2" />}
                                     <p className="text-gray-600">{vacancy.company}</p>
                                 </div>
                                 <div className="flex flex-wrap gap-1 mt-2">
-                                    {vacancy.skills.map((skill, index) => (
+                                    {(vacancy.skills || []).map((skill, index) => (
                                         <span key={index} className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
                                             {skill}
                                         </span>

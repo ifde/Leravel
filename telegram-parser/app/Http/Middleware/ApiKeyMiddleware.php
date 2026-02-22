@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Log;
 
 class ApiKeyMiddleware
 {
@@ -17,7 +18,16 @@ class ApiKeyMiddleware
     {
         $apiKey = $request->header('X-API-Key');
 
-        if ($apiKey !== env('TELEGRAM_PARSER_API_KEY')) {
+        $expectedKey = config('services.telegram_parser.api_key');
+
+        // This will show up in storage/logs/laravel.log
+        Log::info('API Auth Check', [
+            'incoming_header' => $apiKey,
+            'expected_from_env' => $expectedKey,
+            'match' => ($apiKey === $expectedKey)
+        ]);
+
+        if ($apiKey !== $expectedKey) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 

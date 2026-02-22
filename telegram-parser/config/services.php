@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'telegram_parser' => [
+    'api_key' => env('TELEGRAM_PARSER_API_KEY'),
+    ],
+
 ];
