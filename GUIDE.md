@@ -1,4 +1,4 @@
-# How to start a project 
+# How to start a project locally
 
 1. Start a Laravel app
 
@@ -179,6 +179,31 @@ php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 ```
+
+7. Port local database data to the VPS
+
+Create a json
+```
+sail up -d
+./vendor/bin/sail exec pgsql pg_dump -U sail -d laravel > local_dump.sql
+```
+
+Send this json to the VPS   
+`scp -i ~/.ssh/ssh-key-1771671861436 telegram-parser/local_dump.sql laravel@158.160.12.112:~/Leravel/telegram-parser/local_dump.sql`
+
+Run on a VPS    
+```
+sudo -u postgres psql
+DROP DATABASE laravel;
+CREATE DATABASE laravel;
+\q
+sudo -u postgres psql -d laravel -c "GRANT ALL ON SCHEMA public TO sail; ALTER DATABASE laravel OWNER TO sail;"
+psql -h 127.0.0.1 -U sail -d laravel
+\i ~/Leravel/telegram-parser/local_dump.sql
+```
+`\i` stands for "import". It executes every file inside a file
+
+And yes, here we are deleting the database because the dump already contains all the migrations
 
 
 
